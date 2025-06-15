@@ -1,24 +1,23 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getPresignedUrl } = require('../utils/s3Client');
+const { getPresignedUrl } = require("../utils/s3Client");
 
-router.post('/generate-presigned-url', async (req, res) => {
-    console.log("Incoming request body: ", req.body);
-  const { fileName, fileType } = req.body;
+router.post("/generate-presigned-url", async (req, res) => {
+  const { jobId, fileName, fileType } = req.body;
 
-  if (!fileName || !fileType) {
-    return res.status(400).json({ error: 'Missing fileName or fileType' });
+  if (!jobId || !fileName || !fileType) {
+    return res
+      .status(400)
+      .json({ error: "Missing jobId, fileName or fileType" });
   }
 
   try {
-    const url = await getPresignedUrl(fileName, fileType);
-    res.json({ uploadUrl: url });
+    const result = await getPresignedUrl(jobId, fileName, fileType);
+    res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to generate presigned URL' });
+    res.status(500).json({ error: "Failed to generate presigned URL" });
   }
 });
-
-
 
 module.exports = router;
