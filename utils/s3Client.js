@@ -1,24 +1,28 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-require('dotenv').config();
 
+// 🔧 Hardcoded values
+const REGION = "us-east-1";
+const BUCKET = "team-skynet-s3-bucket";
+
+// Initialize S3 client directly
 const s3 = new S3Client({
-    region: process.env.AWS_REGION
-  });
+    region: REGION
+});
 
-const BUCKET = process.env.S3_BUCKET_NAME;
-
-async function getPresignedUrl(fileName, fileType) {
+async function getPresignedUrl(jobId, fileName, fileType) {
   try {
+    const s3Key = `${jobId}/${fileName}`;
+
     const command = new PutObjectCommand({
       Bucket: BUCKET,
-      Key: `simple-resume/${fileName}`,
+      Key: s3Key,
       ContentType: fileType,
       ACL: 'private'
     });
 
     const signedUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
-    console.log("✅ Generated presigned URL:");
+    console.log("✅ Generated presigned URL for:", s3Key);
     console.log(signedUrl);
     return signedUrl;
   } catch (err) {
